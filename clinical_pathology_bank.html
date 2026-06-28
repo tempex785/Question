@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank Pathology Final</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --card: #1e2333;
+    --border: #2a3050;
+    --accent: #c0392b;
+    --accent2: #e74c3c;
+    --gold: #f39c12;
+    --text: #e8eaf0;
+    --muted: #8892a4;
+    --answer-bg: #0d1f1a;
+    --answer-border: #1a6b4a;
+    --answer-text: #4ecca3;
+    --tag-bg: #1a1f35;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, #1a0a0a 0%, #2d0f0f 50%, #1a0a0a 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 24px 20px 20px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(192,57,43,0.3);
+  }
+
+  header h1 {
+    font-size: 1.6rem;
+    font-weight: 900;
+    color: #fff;
+    letter-spacing: 1px;
+  }
+
+  header h1 span {
+    color: var(--accent2);
+  }
+
+  header p {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  /* FILTER TABS */
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 16px 16px 8px;
+    justify-content: center;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 88px;
+    z-index: 99;
+  }
+
+  .filter-btn {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  /* STATS BAR */
+  .stats {
+    display: flex;
+    gap: 16px;
+    padding: 10px 16px;
+    justify-content: center;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .stat span {
+    color: var(--gold);
+    font-weight: 700;
+  }
+
+  /* CONTROLS */
+  .controls {
+    display: flex;
+    gap: 10px;
+    padding: 12px 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 16px;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover { background: var(--border); }
+  .ctrl-btn.green { border-color: #1a6b4a; color: #4ecca3; }
+  .ctrl-btn.green:hover { background: #0d1f1a; }
+
+  /* LECTURE SECTION */
+  .lecture-section {
+    padding: 0 12px 8px;
+  }
+
+  .lecture-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 8px 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .lecture-label::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .lecture-label .lec-tag {
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+  /* Q&A CARD */
+  .qa-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .qa-card.revealed {
+    border-color: var(--answer-border);
+  }
+
+  .qa-card.important {
+    border-color: #6b4a00;
+  }
+
+  .question-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 14px 12px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .q-num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 900;
+    padding: 3px 8px;
+    border-radius: 8px;
+    min-width: 36px;
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .qa-card.important .q-num {
+    background: var(--gold);
+    color: #1a0a00;
+  }
+
+  .q-text {
+    font-size: 0.92rem;
+    font-weight: 600;
+    line-height: 1.6;
+    flex: 1;
+  }
+
+  .toggle-icon {
+    color: var(--muted);
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: transform 0.25s;
+  }
+
+  .qa-card.revealed .toggle-icon {
+    transform: rotate(180deg);
+    color: var(--answer-text);
+  }
+
+  /* ANSWER */
+  .answer-box {
+    display: none;
+    padding: 14px 14px 14px 42px;
+    background: var(--answer-bg);
+    border-top: 1px solid var(--answer-border);
+  }
+
+  .qa-card.revealed .answer-box {
+    display: block;
+  }
+
+  .answer-box ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .answer-box ul li {
+    position: relative;
+    padding-right: 16px;
+    margin-bottom: 6px;
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--answer-text);
+  }
+
+  .answer-box ul li::before {
+    content: '←';
+    position: absolute;
+    right: 0;
+    color: var(--answer-border);
+    font-size: 0.8rem;
+  }
+
+  .answer-box p {
+    font-size: 0.88rem;
+    line-height: 1.7;
+    color: var(--answer-text);
+  }
+
+  .answer-box .sub-label {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin: 8px 0 4px;
+    display: block;
+  }
+
+  .answer-box .note {
+    background: #1a1400;
+    border: 1px solid #6b4a00;
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.8rem;
+    color: #f0c040;
+    margin-top: 8px;
+  }
+
+  /* IMPORTANT MCQ SECTION */
+  .mcq-block {
+    background: #1a1400;
+    border: 1px solid #6b4a00;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .mcq-header {
+    padding: 12px 14px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .mcq-header .star { font-size: 1rem; }
+
+  .mcq-body {
+    display: none;
+    padding: 2px 14px 14px;
+  }
+
+  .mcq-block.open .mcq-body { display: block; }
+  .mcq-block.open .mcq-toggle { transform: rotate(180deg); }
+
+  .mcq-toggle {
+    margin-right: auto;
+    color: var(--gold);
+    transition: transform 0.2s;
+  }
+
+  .mcq-item {
+    margin-bottom: 10px;
+  }
+
+  .mcq-item .mcq-title {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 0.82rem;
+    margin-bottom: 4px;
+  }
+
+  .mcq-item p, .mcq-item li {
+    font-size: 0.85rem;
+    color: #e8c060;
+    line-height: 1.65;
+  }
+
+  .mcq-item ul { list-style: none; padding: 0; }
+  .mcq-item ul li::before { content: '• '; color: var(--gold); }
+
+  /* NO RESULTS */
+  .no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  /* SCROLL TOP */
+  #scrollTop {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(192,57,43,0.5);
+  }
+
+  .main-content {
+    padding-bottom: 60px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <button onclick="window.location.href='index.html'" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ccc;padding:5px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:0.78rem;cursor:pointer;">← الرئيسية</button>
+    <span style="font-size:0.7rem;color:#8892a4;">Horus University</span>
+  </div>
+  <h1>🏥 Bank <span>Pathology Final</span></h1>
+  <p>Clinical Pathology Q&A</p>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" onclick="filterLec('all', this)">الكل</button>
+  <button class="filter-btn" onclick="filterLec('L4', this)">L4 — Kidney</button>
+  <button class="filter-btn" onclick="filterLec('L5', this)">L5 — HAI</button>
+  <button class="filter-btn" onclick="filterLec('L6', this)">L6 — Tumor Markers</button>
+  <button class="filter-btn" onclick="filterLec('L7', this)">L7 — Liver</button>
+  <button class="filter-btn" onclick="filterLec('L8', this)">L8 — Diabetes</button>
+  <button class="filter-btn" onclick="filterLec('L9', this)">L9 — Antibiotics</button>
+</div>
+
+<div class="stats">
+  <div class="stat">الأسئلة: <span id="visibleCount">0</span></div>
+  <div class="stat">مكشوفة: <span id="revealedCount">0</span></div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="revealAll()">⬇ عرض الكل</button>
+  <button class="ctrl-btn" onclick="hideAll()">⬆ إخفاء الكل</button>
+  <button class="ctrl-btn green" onclick="shuffleCards()">🔀 عشوائي</button>
+</div>
+
+<div class="main-content" id="mainContent"></div>
+<div class="no-results" id="noResults">لا توجد أسئلة في هذا القسم</div>
+
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const data = {
+  L4: {
+    title: "L4 — Kidney Function Tests",
+    questions: [
+      { q: "Enumerate functions of the kidney.", a: ["<b>Excretory</b> → excretion of urine and toxins.", "<b>Homeostatic</b> → regulation of blood volume, pH, and electrolytes.", "<b>Endocrine</b> → erythropoietin, renin, activation of vitamin D.", "<b>Metabolic</b> → gluconeogenesis during fasting."] },
+      { q: "Classify renal diseases with examples.", a: ["<b>Pre-renal:</b> reduced blood flow → hemorrhage, hemolysis.", "<b>Renal:</b> glomerular/tubular damage → glomerulonephritis.", "<b>Post-renal:</b> urine outflow obstruction → ureteric, urethral, prostatic obstruction."] },
+      { q: "Enumerate tests used for evaluation of glomerular function.", a: ["Renal clearance tests.", "Blood urea, uric acid, creatinine.", "Proteinuria.", "Hematuria."] },
+      { q: "Enumerate tests used for evaluation of tubular function.", a: ["Urine concentration test.", "Urine dilution test.", "Acidification test.", "Specific proteinuria (tubular proteinuria).", "Glycosuria.", "Aminoaciduria."] },
+      { q: "What test evaluates both glomerular and tubular functions?", a: ["<b>Urine analysis.</b>"] },
+      { q: "Enumerate types of examination in urine analysis.", a: ["<b>Physical:</b> color, pH, specific gravity.", "<b>Chemical:</b> protein, glucose, ketones, bilirubin, urobilinogen.", "<b>Microscopic:</b> RBCs, pus cells, epithelial cells, casts, crystals."] },
+      { q: "Define renal clearance test and mention its unit and use.", a: ["<b>Definition:</b> Volume of plasma completely cleared by kidney per minute.", "<b>Unit:</b> ml/min.", "<b>Use:</b> Assessment of GFR and renal blood flow."] },
+      { q: "Enumerate substances used in renal clearance tests.", a: ["<b>Endogenous:</b> creatinine and urea.", "<b>Exogenous:</b> inulin."] },
+      { q: "Enumerate renal clearance tests and their normal values.", a: ["<b>Inulin clearance → 120 ml/min</b> — method of choice for GFR; freely filtered, not reabsorbed/secreted.", "<b>Urea clearance → 75 ml/min</b> — less sensitive; ~40% reabsorbed.", "<b>Creatinine clearance → 90–120 ml/min</b> — freely filtered, not reabsorbed."] },
+      { q: "Enumerate causes of increased creatinine level.", a: ["Acute/Chronic renal disease.", "Glomerulonephritis.", "Urinary tract obstruction.", "Reduced blood pressure.", "Renal artery stenosis.", "Dehydration.", "Increased muscle bulk."] },
+      { q: "Enumerate causes of increased urea level.", a: ["High protein intake.", "Dehydration.", "Severe burns.", "Diarrhea and vomiting.", "Fever and severe infection.", "GIT bleeding.", "Increased protein metabolism.", "Reduced GFR.", "Obstruction to urinary flow."] },
+      { q: "Define azotemia.", a: ["Increase in blood levels of creatinine, urea, and uric acid."] },
+      { q: "Enumerate indicators of urinary tract infection (UTI).", a: ["Hematuria.", "Nitrites.", "Alkaline urine pH.", "Leukocytes (pus cells)."] },
+    ],
+    mcq: [
+      { title: "Albumin (Urine)", points: ["Normal → < 30 mg/day", "Microalbuminuria → 30–300 mg/day", "Frank proteinuria → > 300 mg/day", "⭐ Microalbuminuria = earliest sign of renal damage"] },
+      { title: "Glucose (Renal threshold)", points: ["180 mg/dL → Indicates Diabetes mellitus"] },
+      { title: "pH level", points: ["Normal urine → acidic", "Alkaline urine → old sample or UTI"] },
+      { title: "Creatinine", points: ["Byproduct of muscle creatine metabolism", "Male: 0.7–1.4 mg/dL | Female: 0.6–1.2 mg/dL"] },
+      { title: "Uric acid", points: ["From breakdown of purines/nucleic acids", "↑ in gout, chemotherapy, kidney disease, radiation", "Male: 3–7 mg/dL | Female: 2–6 mg/dL"] },
+      { title: "Urea", points: ["End product of protein metabolism", "Range: 13–45 mg/dL"] },
+      { title: "Key facts", points: ["Functional unit of kidney → nephron", "Kidney activates vitamin D", "Normal GFR → 90–120 ml/min", "Low fixed specific gravity → CKD"] },
+    ]
+  },
+  L5: {
+    title: "L5 — Hospital Acquired Infections (HAI)",
+    questions: [
+      { q: "Define hospital acquired infections (HAI).", a: ["Infections acquired during hospital treatment after <b>48 hours</b> and were not present at time of admission."] },
+      { q: "Enumerate types of HAI.", a: ["CAUTI — Catheter-Associated Urinary Tract Infection.", "CLABSI — Central Line-Associated Bloodstream Infection.", "VAP/VAE — Ventilator-Associated Events.", "SSI — Surgical Site Infection.", "MRSA infection.", "Clostridium difficile gastrointestinal infection."] },
+      { q: "What is the most common type of HAI?", a: ["<b>CAUTI</b> (Catheter-Associated Urinary Tract Infection)."] },
+      { q: "Enumerate risk factors of HAI.", a: ["<b>Hospital factors:</b> central lines/catheters, unclean environment, surgical contamination, injections.", "<b>Patient factors:</b> antibiotic overuse, immunocompromised, chronic diseases, extremes of age."] },
+      { q: "Enumerate isolation precautions for HAI.", a: ["<b>Contact:</b> gloves and gown.", "<b>Airborne:</b> negative pressure room + N95 mask.", "<b>Droplet:</b> mask + eye protection within 3 feet.", "<b>Enteric:</b> hand washing with soap and water.", "<b>Injection:</b> one syringe, one needle, one time."] },
+      { q: "Mention the 5 moments of hand hygiene. ⭐ Important", a: ["Before touching a patient.", "Before clean/aseptic procedure.", "After body fluid exposure risk.", "After touching a patient.", "After touching patient surroundings."], important: true },
+      { q: "Enumerate Multi-drug Resistant Organisms (MDRO) Strategies.", a: ["Hand hygiene.", "Health education.", "Active surveillance cultures (ASC).", "Enhanced environmental cleaning.", "Improved communication between healthcare sections.", "Contact precautions."] },
+      { q: "Enumerate prevention measures for CAUTI.", a: ["Avoid unnecessary catheter use.", "Hand hygiene.", "Keep bag below bladder level.", "Secure tubing to leg."] },
+      { q: "Enumerate prevention protocols for SSI (Surgical Site Infections).", a: ["<b>Pre-op:</b> showering, pre-op antibiotics, proper hair removal without shaving.", "<b>Intra-op:</b> sterilization measures.", "<b>Post-op:</b> discontinue antibiotics after 48h, patient education and wound care."] },
+      { q: "Enumerate components of VAP bundle.", a: ["Head elevation at least 30°.", "Daily assessment for extubation readiness.", "DVT prophylaxis.", "Swallow evaluation."] },
+      { q: "Compare between sterilization and disinfection.", a: ["<b>Sterilization:</b> destroys ALL microorganisms including spores.", "<b>Disinfection:</b> destroys microorganisms EXCEPT bacterial spores."] },
+      { q: "What is high-level disinfection used for?", a: ["Laryngoscopes.", "Vaginal probes."] },
+    ],
+    mcq: [
+      { title: "Sharps Safety", points: ["⭐ Never recap needles."] },
+    ]
+  },
+  L6: {
+    title: "L6 — Tumor Markers",
+    questions: [
+      { q: "Enumerate properties of an ideal tumor marker.", a: ["High sensitivity: positive in all patients with that cancer.", "High specificity: negative in all normal population.", "Reflects stage of disease.", "Organ specific.", "Stable in stable disease state."] },
+      { q: "Enumerate enzymes used as tumor markers.", a: ["<b>PAP</b> (Prostatic acid phosphatase) → prostatic cancer.", "<b>ALP</b> (Alkaline phosphatase) → bone metastasis.", "<b>CK</b> (Creatine kinase) → breast, prostate, colon, bladder cancers."] },
+      { q: "Enumerate hormones used as tumor markers.", a: ["<b>Calcitonin</b> → medullary thyroid carcinoma.", "<b>β-HCG</b> → choriocarcinoma.", "<b>VMA</b> → pheochromocytoma."] },
+      { q: "Enumerate tumor antigens increased in colorectal, gastric, and pancreatic cancers.", a: ["CEA (Carcinoembryonic antigen).", "CA19-9 (Carbohydrate antigen 19-9)."] },
+      { q: "In what conditions is Alpha fetoprotein (AFP) increased?", a: ["Hepatocellular carcinoma.", "Germ cell tumors."] },
+      { q: "In what conditions is calcitonin increased?", a: ["Medullary thyroid carcinoma.", "Pheochromocytoma.", "Chronic renal failure.", "Hyperparathyroidism."] },
+      { q: "Mention important tumor markers and associated tumors.", a: ["CA15-3 → breast cancer.", "CA125 → ovarian cancer.", "Estrogen & progesterone → breast cancer.", "AFP → hepatocellular carcinoma.", "PSA, PAP → prostatic cancer.", "CEA, CA19-9 → colon, gastric, pancreatic cancers.", "PSA → prostatic cancer, hyperplasia, prostatitis."] },
+      { q: "What is the normal reference range of AFP?", a: ["Up to <b>10 ng/ml</b>."] },
+    ]
+  },
+  L7: {
+    title: "L7 — Liver Function Tests (LFTs)",
+    questions: [
+      { q: "Enumerate roles of liver function tests.", a: ["Screening of liver dysfunction.", "Diagnosis of liver disease.", "Assess severity.", "Disease and treatment follow up."] },
+      { q: "Enumerate markers of liver dysfunction.", a: ["Serum bilirubin (total and conjugated).", "Bile salts and urobilinogen.", "Total protein, serum albumin, A/G ratio.", "Prothrombin time."] },
+      { q: "Enumerate markers of hepatocellular injury.", a: ["ALT (Alanine aminotransferase).", "AST (Aspartate aminotransferase)."] },
+      { q: "Enumerate markers of cholestasis.", a: ["ALP (Alkaline phosphatase).", "GGT (gamma-glutamyltransferase)."] },
+      { q: "Enumerate types of jaundice with causes.", a: ["<b>Pre-hepatic:</b> hemolysis, thalassemia.", "<b>Hepatic:</b> viral hepatitis, intrahepatic cholestasis.", "<b>Post-hepatic:</b> gallstones, extrahepatic cholestasis."] },
+      { q: "Mention important notes about liver enzymes.", a: ["ALT is more liver-specific than AST.", "AST is non-specific.", "ALP is produced by osteoblasts.", "GGT is highly sensitive for alcohol abuse."] },
+      { q: "What are causes of elevated bilirubin?", a: ["Gallstones.", "Hepatitis.", "Hemolytic anemia."] },
+      { q: "Mention normal range of urobilinogen.", a: ["Less than <b>4 mg/day</b>."] },
+      { q: "What does obstruction in biliary passages cause?", a: ["Leakage of bile salts into circulation and excretion in urine."] },
+      { q: "Mention important facts about serum albumin.", a: ["Most abundant protein synthesized by liver.", "Normal range: 3.5–5 g/dL.", "Half-life: 20 days.", "Decreased in chronic liver diseases."] },
+      { q: "What is the normal A/G ratio?", a: ["<b>1.2:1 – 1.5:1</b>"] },
+      { q: "What are causes of prolonged PT?", a: ["Vitamin K deficiency.", "Liver disease."] },
+      { q: "Mention important notes about ALT.", a: ["Normal range: up to 45 U/L.", "High elevation in acute hepatitis: 300–1000 U/L.", "Moderate elevation in alcoholic hepatitis: 100–300 U/L.", "Minor elevation in cirrhosis/hepatitis C: 50–100 U/L."] },
+      { q: "Mention important notes about AST.", a: ["Normal range: up to 40 U/L.", "Increased in acute and chronic hepatitis.", "Increased in cirrhosis.", "Increased in HCC."] },
+      { q: "Mention causes of elevated GGT and ALP.", a: ["Infective hepatitis.", "Alcoholic hepatitis.", "Hepatocellular carcinoma.", "Extrahepatic obstruction.", "Intrahepatic cholestasis.", "<b>ALP extra:</b> bone diseases. | <b>GGT extra:</b> prostatic cancer."] },
+    ],
+    mcq: [
+      { title: "Bilirubin", points: ["Types: Total, Conjugated, Unconjugated", "Normal: 1 mg/dL → above = jaundice", "Unconjugated > Conjugated bilirubin"] },
+      { title: "Albumin", points: ["Depends on functioning liver cell mass"] },
+      { title: "γ-Globulin", points: ["↑ in chronic hepatitis, cirrhosis, hypoalbuminemia", "Range: 2.5–3.5 g/dL"] },
+      { title: "Prothrombin Time", points: ["Prolonged when liver loses >80% of reserve capacity"] },
+    ]
+  },
+  L8: {
+    title: "L8 — Diabetes Mellitus",
+    questions: [
+      { q: "Define diabetes mellitus.", a: ["Chronic condition characterized by <b>hyperglycemia</b>."] },
+      { q: "Classify diabetes mellitus.", a: ["<b>Type 1:</b> severe insulin deficiency, IDDM, juvenile onset.", "<b>Type 2:</b> insulin resistance + relative deficiency, NIDDM, adult onset.", "<b>Gestational DM:</b> during pregnancy, disappears after delivery.", "<b>Secondary DM.</b>"] },
+      { q: "Enumerate laboratory tests used for diagnosis of DM.", a: ["Glucosuria and ketonuria tests.", "Random blood glucose.", "Fasting blood glucose.", "OGTT (Oral Glucose Tolerance Test).", "HbA1c."] },
+      { q: "Enumerate advantages of HbA1c.", a: ["Convenient.", "Single sample.", "Reflects long-term glucose level (3 months).", "Low day-to-day variability."] },
+      { q: "Enumerate contraindications/disadvantages of HbA1c.", a: ["Chronic renal failure.", "Iron deficiency anemia.", "Vitamin B12 deficiency.", "Hemolytic anemia."] },
+      { q: "Compare between Type 1 and Type 2 DM.", a: ["<b>Type 1:</b> juvenile, thin, insulin absent, treated with insulin, antibodies present, low C-peptide, DKA common.", "<b>Type 2:</b> adult, obese, insulin present, non-insulin agents, antibodies absent, normal/high C-peptide, DKA rare."] },
+    ],
+    mcq: [
+      { title: "Glucose conversion", points: ["mmol/L = mg/dL ÷ 18"] },
+      { title: "Glucosuria", points: ["Occurs when blood glucose > 180 mg/dL (renal threshold)"] },
+      { title: "Random Blood Glucose", points: ["Diabetes → ≥ 200 mg/dL (11.1 mmol/L)"] },
+      { title: "Fasting Blood Glucose", points: ["Normal → < 100 mg/dL (5.6 mmol/L)", "Prediabetes → 100–125 mg/dL (5.6–6.9 mmol/L)", "Diabetes → ≥ 126 mg/dL (7 mmol/L) on 2 separate tests"] },
+      { title: "OGTT", points: ["Normal → < 140 mg/dL", "Prediabetes → 140–199 mg/dL", "Diabetes → ≥ 200 mg/dL"] },
+      { title: "HbA1c", points: ["Reflects avg glucose over 3 months (RBC lifespan)", "Normal → < 5.7%", "Prediabetes → 5.7–6.4%", "Diabetes → ≥ 6.5%"] },
+    ]
+  },
+  L9: {
+    title: "L9 — Antibiotics",
+    questions: [
+      { q: "Classify antibiotics according to action.", a: ["<b>Bactericidal</b> → kill bacteria.", "<b>Bacteriostatic</b> → inhibit bacterial growth and multiplication."] },
+      { q: "Classify antibiotics according to spectrum of action.", a: ["<b>Broad spectrum</b> → act on Gram +ve and Gram -ve.", "<b>Narrow spectrum</b> → act on either Gram +ve or Gram -ve."] },
+      { q: "Define therapeutic index.", a: ["Ratio between <b>toxic dose to humans</b> and <b>therapeutic dose against bacteria</b>."] },
+      { q: "Compare between antibiotics according to therapeutic index.", a: ["<b>Penicillin</b> → high therapeutic index (safest).", "<b>Aminoglycosides</b> → low therapeutic index (dangerous).", "<b>Polymyxin B</b> → lowest therapeutic index (most toxic)."] },
+      { q: "Classify antibiotics according to mechanism of action with examples.", a: ["Inhibition of cell wall synthesis → β-lactams.", "Inhibition of protein synthesis → aminoglycosides, chloramphenicol.", "Inhibition of nucleic acid synthesis → metronidazole.", "Inhibition of metabolic pathways → sulfonamides.", "Alteration of cell membrane → polymyxin B."] },
+      { q: "Classify antibiotics according to bacterial target.", a: ["<b>Gram (-):</b> Aminoglycosides.", "<b>Gram (+):</b> Macrolides, Lincosamides, Glycopeptides."] },
+      { q: "Define β-lactam antibiotics and mention their mechanism and examples.", a: ["<b>Action:</b> bactericidal.", "<b>Mechanism:</b> inhibit cell wall synthesis.", "<b>Examples:</b> Penicillin, Cephalosporins, Carbapenems."] },
+      { q: "Enumerate criteria of ideal antimicrobial agent.", a: ["Selective toxicity.", "Resistance does not develop rapidly.", "No effect on normal flora.", "No hypersensitivity."] },
+      { q: "Enumerate safe antibiotics used in pregnancy.", a: ["Penicillins.", "Cephalosporins.", "Erythromycin."] },
+      { q: "Enumerate safe antibiotics used in hepatic patients.", a: ["Penicillins.", "Cephalosporins.", "Aminoglycosides."] },
+      { q: "Enumerate safe antibiotics used in renal patients.", a: ["Penicillins.", "Cephalosporins.", "Nitrofurantoin."] },
+      { q: "Define antibiotic resistance.", a: ["Lack of antimicrobial effect against previously susceptible microorganism."] },
+      { q: "Enumerate mechanisms of antibiotic resistance.", a: ["Decreased permeability to antimicrobial agent.", "Alteration of antibiotic binding sites.", "Enzymatic inactivation.", "Efflux pumps."] },
+      { q: "Mention antibiotics used for MRSA, VRE, ESBL, CRE.", a: ["MRSA → <b>vancomycin</b>.", "VRE → <b>penicillin</b>.", "ESBL → <b>carbapenems</b>.", "CRE → <b>rifampin</b>."] },
+    ],
+    mcq: [
+      { title: "MRSA is resistant to:", points: ["Methicillin", "β-lactams", "Macrolides", "Lincosamides"] },
+      { title: "Antibiotic Gram Coverage", points: ["Aminoglycosides → Gram (-)", "Cephalosporins → Gram (+/-)", "Tetracyclines → Gram (+/-)", "Penicillins → Gram (+/-)", "Sulfonamides → Gram (+/-)", "Fluoroquinolones → Gram (+/-)", "Macrolides → Gram (+)", "Carbapenems → Gram (+/-)", "Lincosamides → Gram (+)", "Glycopeptides → Gram (+)"] },
+      { title: "Mnemonic: GLAM = Gram (+) ONLY", points: ["Glycopeptides", "Lincosamides", "Aminoglycosides — wait, Gram (-)", "Macrolides"] },
+    ]
+  }
+};
+
+let currentFilter = 'all';
+let revealedSet = new Set();
+
+function buildCards() {
+  const container = document.getElementById('mainContent');
+  container.innerHTML = '';
+  let totalVisible = 0;
+
+  const lecKeys = currentFilter === 'all' ? Object.keys(data) : [currentFilter];
+
+  lecKeys.forEach(lec => {
+    const section = data[lec];
+    const secDiv = document.createElement('div');
+    secDiv.className = 'lecture-section';
+    secDiv.dataset.lec = lec;
+
+    // Lecture label
+    const label = document.createElement('div');
+    label.className = 'lecture-label';
+    label.innerHTML = `<span class="lec-tag">${lec}</span>${section.title.replace(/L\d+ — /, '')}`;
+    secDiv.appendChild(label);
+
+    // Questions
+    section.questions.forEach((item, idx) => {
+      const id = `${lec}_${idx}`;
+      totalVisible++;
+      const card = document.createElement('div');
+      card.className = 'qa-card' + (item.important ? ' important' : '') + (revealedSet.has(id) ? ' revealed' : '');
+      card.dataset.id = id;
+      card.innerHTML = `
+        <div class="question-row" onclick="toggleCard('${id}', this.closest('.qa-card'))">
+          <div class="q-num">Q${idx+1}</div>
+          <div class="q-text">${item.q}</div>
+          <div class="toggle-icon">▼</div>
+        </div>
+        <div class="answer-box">
+          <ul>${item.a.map(a => `<li>${a}</li>`).join('')}</ul>
+        </div>
+      `;
+      secDiv.appendChild(card);
+    });
+
+    // MCQ block
+    if (section.mcq && section.mcq.length) {
+      const mcqDiv = document.createElement('div');
+      mcqDiv.className = 'mcq-block';
+      mcqDiv.innerHTML = `
+        <div class="mcq-header" onclick="this.parentElement.classList.toggle('open')">
+          <span class="star">⭐</span> IMPORTANT MCQ & OSPE — ${section.title.replace(/L\d+ — /, '')}
+          <span class="mcq-toggle">▼</span>
+        </div>
+        <div class="mcq-body">
+          ${section.mcq.map(m => `
+            <div class="mcq-item">
+              <div class="mcq-title">📌 ${m.title}</div>
+              <ul>${m.points.map(p => `<li>${p}</li>`).join('')}</ul>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      secDiv.appendChild(mcqDiv);
+    }
+
+    container.appendChild(secDiv);
+  });
+
+  document.getElementById('visibleCount').textContent = totalVisible;
+  updateRevealedCount();
+
+  const noRes = document.getElementById('noResults');
+  noRes.style.display = totalVisible === 0 ? 'block' : 'none';
+}
+
+function toggleCard(id, card) {
+  card.classList.toggle('revealed');
+  if (card.classList.contains('revealed')) {
+    revealedSet.add(id);
+  } else {
+    revealedSet.delete(id);
+  }
+  updateRevealedCount();
+}
+
+function updateRevealedCount() {
+  document.getElementById('revealedCount').textContent = revealedSet.size;
+}
+
+function filterLec(lec, btn) {
+  currentFilter = lec;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildCards();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function revealAll() {
+  document.querySelectorAll('.qa-card').forEach(card => {
+    card.classList.add('revealed');
+    revealedSet.add(card.dataset.id);
+  });
+  updateRevealedCount();
+}
+
+function hideAll() {
+  document.querySelectorAll('.qa-card').forEach(card => {
+    card.classList.remove('revealed');
+  });
+  revealedSet.clear();
+  updateRevealedCount();
+}
+
+function shuffleCards() {
+  // Shuffle questions within each lecture section
+  const lecKeys = currentFilter === 'all' ? Object.keys(data) : [currentFilter];
+  lecKeys.forEach(lec => {
+    const arr = data[lec].questions;
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  });
+  revealedSet.clear();
+  buildCards();
+}
+
+// Scroll to top button
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').style.display = window.scrollY > 300 ? 'block' : 'none';
+});
+
+buildCards();
+</script>
+</body>
+</html>
