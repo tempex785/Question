@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank Radiology Final</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap');
+
+  :root {
+    --bg: #0a0f18;
+    --surface: #111827;
+    --card: #1a2235;
+    --border: #243050;
+    --accent: #1a6bb5;
+    --accent2: #2d8cde;
+    --gold: #f0a500;
+    --text: #dde4f0;
+    --muted: #7a8aa4;
+    --answer-bg: #071220;
+    --answer-border: #1a5580;
+    --answer-text: #60b8f5;
+    --tag-bg: #101a2e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Cairo', sans-serif;
+    min-height: 100vh;
+  }
+
+  header {
+    background: linear-gradient(135deg, #050d1a 0%, #0a1e3a 50%, #050d1a 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 16px 20px 16px;
+    text-align: center;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 4px 24px rgba(26,107,181,0.3);
+  }
+
+  header h1 { font-size: 1.55rem; font-weight: 900; color: #fff; }
+  header h1 span { color: var(--accent2); }
+  header p { font-size: 0.78rem; color: var(--muted); margin-top: 3px; }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 14px 14px 8px;
+    justify-content: center;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 84px;
+    z-index: 99;
+  }
+
+  .filter-btn {
+    background: var(--tag-bg);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 13px;
+    border-radius: 20px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.76rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .filter-btn.active, .filter-btn:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+
+  .stats {
+    display: flex;
+    gap: 16px;
+    padding: 9px 16px;
+    justify-content: center;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stat { font-size: 0.74rem; color: var(--muted); }
+  .stat span { color: var(--gold); font-weight: 700; }
+
+  .controls {
+    display: flex;
+    gap: 10px;
+    padding: 10px 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .ctrl-btn {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 15px;
+    border-radius: 8px;
+    font-family: 'Cairo', sans-serif;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .ctrl-btn:hover { background: var(--border); }
+  .ctrl-btn.blue { border-color: #1a5580; color: var(--answer-text); }
+  .ctrl-btn.blue:hover { background: var(--answer-bg); }
+
+  .lecture-section { padding: 0 12px 8px; }
+
+  .lecture-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 8px 8px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    margin-top: 8px;
+  }
+
+  .lecture-label::before {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .lecture-label .lec-tag {
+    background: var(--accent);
+    color: #fff;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+  }
+
+  .qa-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    margin-bottom: 9px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+
+  .qa-card.revealed { border-color: var(--answer-border); }
+
+  .question-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+    padding: 13px 13px 11px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .q-num {
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.68rem;
+    font-weight: 900;
+    padding: 3px 7px;
+    border-radius: 7px;
+    min-width: 34px;
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .q-text { font-size: 0.9rem; font-weight: 600; line-height: 1.6; flex: 1; }
+
+  .toggle-icon {
+    color: var(--muted);
+    font-size: 1rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+    transition: transform 0.25s;
+  }
+
+  .qa-card.revealed .toggle-icon {
+    transform: rotate(180deg);
+    color: var(--answer-text);
+  }
+
+  .answer-box {
+    display: none;
+    padding: 13px 13px 13px 40px;
+    background: var(--answer-bg);
+    border-top: 1px solid var(--answer-border);
+  }
+
+  .qa-card.revealed .answer-box { display: block; }
+
+  .answer-box ul { list-style: none; padding: 0; }
+
+  .answer-box ul li {
+    position: relative;
+    padding-right: 16px;
+    margin-bottom: 6px;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: var(--answer-text);
+  }
+
+  .answer-box ul li::before {
+    content: '←';
+    position: absolute;
+    right: 0;
+    color: var(--answer-border);
+    font-size: 0.78rem;
+  }
+
+  .answer-box p { font-size: 0.86rem; line-height: 1.7; color: var(--answer-text); }
+
+  /* Comparison table */
+  .compare-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 6px;
+    font-size: 0.82rem;
+  }
+
+  .compare-table th {
+    background: #0d2040;
+    color: var(--accent2);
+    padding: 7px 10px;
+    text-align: right;
+    font-weight: 700;
+    border: 1px solid var(--border);
+  }
+
+  .compare-table td {
+    padding: 7px 10px;
+    border: 1px solid var(--border);
+    color: var(--answer-text);
+    vertical-align: top;
+  }
+
+  .compare-table tr:nth-child(even) td { background: rgba(26,107,181,0.06); }
+
+  /* MCQ block */
+  .mcq-block {
+    background: #0a1a2e;
+    border: 1px solid #1a4a7a;
+    border-radius: 12px;
+    margin-bottom: 10px;
+    overflow: hidden;
+  }
+
+  .mcq-header {
+    padding: 11px 14px;
+    font-size: 0.83rem;
+    font-weight: 700;
+    color: var(--gold);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .mcq-toggle { margin-right: auto; color: var(--gold); transition: transform 0.2s; }
+  .mcq-block.open .mcq-body { display: block; }
+  .mcq-block.open .mcq-toggle { transform: rotate(180deg); }
+
+  .mcq-body { display: none; padding: 2px 14px 14px; }
+
+  .mcq-item { margin-bottom: 10px; }
+
+  .mcq-item .mcq-title {
+    color: var(--gold);
+    font-weight: 700;
+    font-size: 0.8rem;
+    margin-bottom: 4px;
+  }
+
+  .mcq-item li {
+    font-size: 0.83rem;
+    color: #c0d8f5;
+    line-height: 1.7;
+    list-style: none;
+    padding-right: 12px;
+  }
+
+  .mcq-item li::before { content: '• '; color: var(--accent2); }
+
+  .no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  #scrollTop {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 42px;
+    height: 42px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: none;
+    z-index: 200;
+    box-shadow: 0 4px 12px rgba(26,107,181,0.5);
+  }
+
+  .main-content { padding-bottom: 60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+    <button onclick="window.location.href='index.html'" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#ccc;padding:5px 12px;border-radius:8px;font-family:Cairo,sans-serif;font-size:0.78rem;cursor:pointer;">← الرئيسية</button>
+    <span style="font-size:0.7rem;color:#7a8aa4;">Horus University</span>
+  </div>
+  <h1>🩻 Bank <span>Radiology Final</span></h1>
+  <p>Radiology Physics Q&A</p>
+</header>
+
+<div class="filters" id="filters">
+  <button class="filter-btn active" onclick="filterLec('all', this)">الكل</button>
+  <button class="filter-btn" onclick="filterLec('L45', this)">L4,5 — Chest X-Ray</button>
+  <button class="filter-btn" onclick="filterLec('L6', this)">L6 — Abdominal X-Ray & US</button>
+  <button class="filter-btn" onclick="filterLec('L7', this)">L7 — Chest & Abdominal CT</button>
+  <button class="filter-btn" onclick="filterLec('L8', this)">L8 — Spine Imaging</button>
+  <button class="filter-btn" onclick="filterLec('L9', this)">L9 — Radiation Protection</button>
+</div>
+
+<div class="stats">
+  <div class="stat">الأسئلة: <span id="visibleCount">0</span></div>
+  <div class="stat">مكشوفة: <span id="revealedCount">0</span></div>
+</div>
+
+<div class="controls">
+  <button class="ctrl-btn" onclick="revealAll()">⬇ عرض الكل</button>
+  <button class="ctrl-btn" onclick="hideAll()">⬆ إخفاء الكل</button>
+  <button class="ctrl-btn blue" onclick="shuffleCards()">🔀 عشوائي</button>
+</div>
+
+<div class="main-content" id="mainContent"></div>
+<div class="no-results" id="noResults">لا توجد أسئلة في هذا القسم</div>
+<button id="scrollTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<script>
+const data = {
+  L45: {
+    title: "L4,5 — Chest X-Ray",
+    questions: [
+      {
+        q: "Mention the main chest X-ray views.",
+        a: [
+          "<b>PA view:</b> standard view from posterior to anterior.",
+          "<b>AP view:</b> from anterior to posterior using mobile X-ray unit. Causes magnification of mediastinum and heart. Cannot diagnose cardiomegaly accurately.",
+          "<b>Lateral view:</b> used for localization of chest pathology."
+        ]
+      },
+      {
+        q: "How do you assess image quality in chest X-ray?",
+        a: [
+          "<b>Rotation:</b> patient should be centralized. Trachea/spinous process equidistant between clavicular heads.",
+          "<b>Inspiration:</b> anterior ribs ≥ 6. Posterior ribs ≥ 8–9. Poor inspiration → enlarged cardiac shadow and crowding of lung vessels.",
+          "<b>Exposure:</b> lower thoracic vertebral bodies should be seen behind heart. Overexposure → very dark image with loss of details. Underexposure → bright image with loss of details."
+        ]
+      },
+      {
+        q: "Enumerate the main radiological findings/signs in chest X-ray.",
+        a: [
+          "<b>Bone and ribs</b> → fractures, bony lesions, tumors.",
+          "<b>Pleura</b> → pleural effusion, pneumothorax.",
+          "<b>Lungs</b> → consolidation, nodule, mass, cavity lesion.",
+          "<b>Mediastinum</b> → cardiac shadow, mediastinal masses."
+        ]
+      },
+      {
+        q: "Define pleural effusion and mention its types.",
+        a: [
+          "<b>Definition:</b> abnormal accumulation of fluid in pleural cavity.",
+          "<b>Hydro-thorax</b> → simple fluid.",
+          "<b>Pyo-thorax</b> → pus.",
+          "<b>Haemo-thorax</b> → blood."
+        ]
+      },
+      {
+        q: "Define pneumothorax.",
+        a: [
+          "Abnormal collection of air in pleural space causing lung collapse.",
+          "<b>Sign:</b> absence of visceral pleural line and lung markings."
+        ]
+      },
+      {
+        q: "Define patch opacity/consolidation and mention its causes.",
+        a: [
+          "<b>Definition:</b> ill-defined area of lung opacification caused by fluids or solid material.",
+          "<b>Water</b> → drowning.",
+          "<b>Blood</b> → pulmonary hemorrhage.",
+          "<b>Pus</b> → pneumonia.",
+          "<b>Malignant cells</b> → carcinoma."
+        ]
+      },
+      {
+        q: "Compare between pulmonary nodule and pulmonary mass.",
+        a: ["<b>Both:</b> well-defined opacity in lung.", "<b>Pulmonary Nodule:</b> less than 3 cm.", "<b>Pulmonary Mass:</b> more than 3 cm."],
+        table: {
+          headers: ["Pulmonary Mass", "Pulmonary Nodule"],
+          rows: [
+            ["Well-defined opacity in lung", "Well-defined opacity in lung"],
+            ["More than 3 cm", "Less than 3 cm"]
+          ]
+        }
+      },
+      {
+        q: "Define pulmonary cavity and mention its causes.",
+        a: [
+          "<b>Definition:</b> collection of gas or fluid.",
+          "<b>Infection</b> (abscess).",
+          "<b>Malignancy.</b>"
+        ]
+      },
+      {
+        q: "How is cardiac shadow assessed?",
+        a: ["When heart size is more than <b>50%</b> of thorax size → <b>cardiomegaly</b>."]
+      },
+      {
+        q: "Enumerate mediastinal masses.",
+        a: ["Vascular masses.", "Neoplastic masses (benign or malignant)."]
+      },
+      {
+        q: "What is the use of 3D CT and CT angiography?",
+        a: ["<b>3D CT</b> → bone assessment.", "<b>CT angiography</b> → blood vessels assessment."]
+      }
+    ],
+    mcq: [
+      { title: "⭐ Key MCQ", points: ["Blunting of costophrenic angle → small pleural effusion"] }
+    ]
+  },
+  L6: {
+    title: "L6 — Abdominal X-Ray & Ultrasound",
+    questions: [
+      {
+        q: "Enumerate indications of abdominal X-ray.",
+        a: [
+          "Intra-peritoneal free gas (intestinal perforation).",
+          "Radiopaque foreign bodies.",
+          "Renal stones.",
+          "Pneumoperitoneum (intra-peritoneal free gas)."
+        ]
+      },
+      {
+        q: "Mention radiological findings of intestinal obstruction.",
+        a: [
+          "<b>Dilated bowel loops (3-6-9 rule):</b> Small bowel < 3 cm. Large bowel < 6 cm. Cecum < 9 cm.",
+          "<b>Suspicious air-fluid levels:</b> Multiple (> 3 levels). Width > 2.5 cm. Same loop of bowel at different heights > 2 cm."
+        ]
+      },
+      {
+        q: "Define intestinal volvulus.",
+        a: [
+          "Torsion of bowel around its mesentery.",
+          "<b>Common type:</b> sigmoid volvulus.",
+          "<b>Sign:</b> coffee bean appearance."
+        ]
+      },
+      {
+        q: "Define pneumoperitoneum and mention its causes.",
+        a: [
+          "<b>Definition:</b> presence of gas in peritoneal cavity (air under diaphragm).",
+          "Perforated peptic ulcer.",
+          "Trauma."
+        ]
+      },
+      {
+        q: "Enumerate indications of abdominal ultrasound.",
+        a: ["Abdominal pain.", "Altered liver function tests.", "Jaundice.", "Renal symptoms."]
+      },
+      {
+        q: "Define FAST (Focused Assessment with Sonography in Trauma).",
+        a: ["U.S protocol performed in trauma patients to identify <b>intraperitoneal free fluid</b> and <b>internal hemorrhage</b>."]
+      },
+      {
+        q: "Enumerate the standard views of FAST and their regions.",
+        a: [
+          "<b>RUQ view</b> → hepatorenal space (Morison pouch).",
+          "<b>LUQ view</b> → peri-splenic region.",
+          "<b>Pelvic view</b> → urinary bladder / most dependent peritoneal space in supine trauma patient. ⭐ MCQ",
+          "<b>Pericardial view</b> → pericardium around heart."
+        ]
+      }
+    ],
+    mcq: [
+      { title: "FAST Views Summary", points: ["RUQ → Morison pouch", "LUQ → peri-splenic", "Pelvic → urinary bladder (most dependent in supine) ⭐", "Pericardial → heart"] }
+    ]
+  },
+  L7: {
+    title: "L7 — Chest & Abdominal CT",
+    questions: [
+      {
+        q: "Enumerate indications of CT chest.",
+        a: [
+          "Abnormal findings detected on chest X-ray.",
+          "Chest trauma.",
+          "Complex infections.",
+          "Interstitial lung disease.",
+          "Lung cancer."
+        ]
+      },
+      {
+        q: "Enumerate radiological findings identified in chest CT scan.",
+        a: [
+          "Nodule.", "Mass.", "Cavitary lesion.", "Pleural effusion.", "Rib fractures.",
+          "Pneumothorax.", "Hemothorax.", "Lung collapse.", "Consolidation."
+        ]
+      },
+      {
+        q: "Enumerate indications of abdominal CT.",
+        a: [
+          "Trauma to abdomen or pelvis.",
+          "Abdominal or pelvic pain.",
+          "Primary abdominal tumors.",
+          "Infection (abscess).",
+          "Bowel obstruction."
+        ]
+      },
+      {
+        q: "What is the standard CT abdomen protocol?",
+        a: [
+          "<b>Non-contrast protocol:</b> used for detection of renal stones.",
+          "<b>Oral or rectal contrast protocol:</b> used for suspected GIT abnormalities.",
+          "<b>Post-contrast protocol (Tri-phasic study):</b> Arterial phase → after 15 sec. Venous phase → after 60 sec. Delayed phase → after 6–10 min."
+        ]
+      }
+    ],
+    mcq: []
+  },
+  L8: {
+    title: "L8 — Spine Imaging",
+    questions: [
+      {
+        q: "Compare between types of spine fractures.",
+        a: [
+          "<b>Teardrop fracture:</b> forced flexion/extension. Common in cervical spine. Avulsion of anteroinferior corner. Stable fracture.",
+          "<b>Compression (wedge) fracture:</b> hyperflexion injury. Common in lumbar vertebrae. Anterior part affected → wedge shape. Stable fracture.",
+          "<b>Burst fracture:</b> disruption of vertebral body endplate and posterior cortex. Retropulsion into spinal canal. Unstable fracture."
+        ],
+        table: {
+          headers: ["Fracture", "Mechanism", "Site", "Stability"],
+          rows: [
+            ["Teardrop", "Forced flexion/extension", "Cervical", "Stable"],
+            ["Wedge/Compression", "Hyperflexion", "Lumbar", "Stable"],
+            ["Burst", "Axial load", "Any", "Unstable ⚠️"]
+          ]
+        }
+      },
+      {
+        q: "Mention clinical presentation of traumatic spinal cord injury.",
+        a: [
+          "Neurological dysfunction up to complete paralysis (spinal cord transection).",
+          "Neurological signs → limb weakness, autonomic dysfunction.",
+          "Autonomic dysfunction.",
+          "Pain due to musculoskeletal injury."
+        ]
+      },
+      {
+        q: "Enumerate types of traumatic spinal cord injuries and their appearance.",
+        a: [
+          "<b>Extrinsic compression (disc herniation):</b> tear in outer fibrous layer allowing bulging of soft central portion.",
+          "<b>Spinal cord transection:</b> tear within the spinal cord due to significant trauma.",
+          "<b>Spinal cord contusion/edema.</b>"
+        ]
+      },
+      {
+        q: "Define disc herniation.",
+        a: ["Injury to intervertebral disc causing bulging of soft central portion through tear in outer fibrous layer."]
+      },
+      {
+        q: "What is the most accurate examination for spinal cord injury?",
+        a: ["<b>MRI</b> — best for soft tissue (spinal cord).", "X-ray and CT → best for bony injuries."]
+      }
+    ],
+    mcq: [
+      { title: "Imaging of Choice", points: ["MRI → spinal cord injury (soft tissue)", "CT / X-ray → bony injuries"] }
+    ]
+  },
+  L9: {
+    title: "L9 — Radiation Protection",
+    questions: [
+      {
+        q: "Enumerate biological effects of ionizing radiation.",
+        a: [
+          "<b>Somatic effects:</b> appear in the exposed individual → cancer, sterility, opacification of lens.",
+          "<b>Genetic effects:</b> appear in offspring of exposed individual → mutations."
+        ]
+      },
+      {
+        q: "Radiation protection includes whom?",
+        a: ["Patient.", "Operator.", "Members of the public."]
+      },
+      {
+        q: "Enumerate principles of radiation protection.",
+        a: [
+          "<b>Justification</b> → benefit must be more than risk.",
+          "<b>Optimization</b> → ALARA (As Low As Reasonably Achievable).",
+          "<b>Dose limitation</b> → avoid unnecessary high radiation dose."
+        ]
+      },
+      {
+        q: "Define dosimeter.",
+        a: ["A device that measures external radiation dose received by staff."]
+      },
+      {
+        q: "Enumerate strategies for radiation protection.",
+        a: [
+          "<b>Limit time</b> of exposure → directly proportional to radiation dose.",
+          "<b>Increase distance</b> → inversely proportional to radiation dose.",
+          "<b>Use shielding</b> (lead apron + thyroid shield)."
+        ]
+      },
+      {
+        q: "Mention types of shielding.",
+        a: [
+          "Lead apron.", "Lead thyroid collar.", "Lead gloves.",
+          "Lead gonadal shield.", "Mobile lead shield.", "Lead glasses.", "Lead glass."
+        ]
+      },
+      {
+        q: "Upon what does fetal sensitivity to radiation depend?",
+        a: ["Gestational stage.", "Radiation dose."]
+      },
+      {
+        q: "Mention radiation protection considerations for pregnant patient.",
+        a: [
+          "Benefit must be more than risk.",
+          "Follow ALARA principle.",
+          "Use lowest possible dose.",
+          "Use shielding.",
+          "Minimize number of films."
+        ]
+      },
+      {
+        q: "Mention radiation protection considerations for pregnant worker/staff.",
+        a: [
+          "Notify the department.",
+          "Work schedule should be altered.",
+          "Use second dosimeter under apron at waist level."
+        ]
+      }
+    ],
+    mcq: [
+      { title: "Key Principles Mnemonic: JOD", points: ["J — Justification", "O — Optimization (ALARA)", "D — Dose limitation"] },
+      { title: "Shielding Types", points: ["Lead apron", "Thyroid collar", "Gloves", "Gonadal shield", "Mobile shield", "Lead glasses", "Lead glass"] }
+    ]
+  }
+};
+
+let currentFilter = 'all';
+let revealedSet = new Set();
+
+function buildCards() {
+  const container = document.getElementById('mainContent');
+  container.innerHTML = '';
+  let totalVisible = 0;
+
+  const lecKeys = currentFilter === 'all' ? Object.keys(data) : [currentFilter];
+
+  lecKeys.forEach(lec => {
+    const section = data[lec];
+    const secDiv = document.createElement('div');
+    secDiv.className = 'lecture-section';
+    secDiv.dataset.lec = lec;
+
+    const label = document.createElement('div');
+    label.className = 'lecture-label';
+    label.innerHTML = `<span class="lec-tag">${lec}</span>${section.title.replace(/L[\d,]+ — /, '')}`;
+    secDiv.appendChild(label);
+
+    section.questions.forEach((item, idx) => {
+      const id = `${lec}_${idx}`;
+      totalVisible++;
+      const card = document.createElement('div');
+      card.className = 'qa-card' + (revealedSet.has(id) ? ' revealed' : '');
+      card.dataset.id = id;
+
+      let answerHTML = '';
+      if (item.table) {
+        answerHTML = `<table class="compare-table">
+          <tr>${item.table.headers.map(h => `<th>${h}</th>`).join('')}</tr>
+          ${item.table.rows.map(r => `<tr>${r.map(c => `<td>${c}</td>`).join('')}</tr>`).join('')}
+        </table>`;
+      } else {
+        answerHTML = `<ul>${item.a.map(a => `<li>${a}</li>`).join('')}</ul>`;
+      }
+
+      card.innerHTML = `
+        <div class="question-row" onclick="toggleCard('${id}', this.closest('.qa-card'))">
+          <div class="q-num">Q${idx+1}</div>
+          <div class="q-text">${item.q}</div>
+          <div class="toggle-icon">▼</div>
+        </div>
+        <div class="answer-box">${answerHTML}</div>
+      `;
+      secDiv.appendChild(card);
+    });
+
+    if (section.mcq && section.mcq.length) {
+      const mcqDiv = document.createElement('div');
+      mcqDiv.className = 'mcq-block';
+      mcqDiv.innerHTML = `
+        <div class="mcq-header" onclick="this.parentElement.classList.toggle('open')">
+          <span>⭐</span> IMPORTANT MCQ — ${section.title.replace(/L[\d,]+ — /, '')}
+          <span class="mcq-toggle">▼</span>
+        </div>
+        <div class="mcq-body">
+          ${section.mcq.map(m => `
+            <div class="mcq-item">
+              <div class="mcq-title">📌 ${m.title}</div>
+              <ul>${m.points.map(p => `<li>${p}</li>`).join('')}</ul>
+            </div>
+          `).join('')}
+        </div>
+      `;
+      secDiv.appendChild(mcqDiv);
+    }
+
+    container.appendChild(secDiv);
+  });
+
+  document.getElementById('visibleCount').textContent = totalVisible;
+  updateRevealedCount();
+  document.getElementById('noResults').style.display = totalVisible === 0 ? 'block' : 'none';
+}
+
+function toggleCard(id, card) {
+  card.classList.toggle('revealed');
+  revealedSet.has(id) ? revealedSet.delete(id) : revealedSet.add(id);
+  updateRevealedCount();
+}
+
+function updateRevealedCount() {
+  document.getElementById('revealedCount').textContent = revealedSet.size;
+}
+
+function filterLec(lec, btn) {
+  currentFilter = lec;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildCards();
+  window.scrollTo({top: 0, behavior: 'smooth'});
+}
+
+function revealAll() {
+  document.querySelectorAll('.qa-card').forEach(card => {
+    card.classList.add('revealed');
+    revealedSet.add(card.dataset.id);
+  });
+  updateRevealedCount();
+}
+
+function hideAll() {
+  document.querySelectorAll('.qa-card').forEach(card => card.classList.remove('revealed'));
+  revealedSet.clear();
+  updateRevealedCount();
+}
+
+function shuffleCards() {
+  const lecKeys = currentFilter === 'all' ? Object.keys(data) : [currentFilter];
+  lecKeys.forEach(lec => {
+    const arr = data[lec].questions;
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  });
+  revealedSet.clear();
+  buildCards();
+}
+
+window.addEventListener('scroll', () => {
+  document.getElementById('scrollTop').style.display = window.scrollY > 300 ? 'block' : 'none';
+});
+
+buildCards();
+</script>
+</body>
+</html>
